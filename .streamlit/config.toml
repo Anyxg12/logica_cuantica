@@ -1,0 +1,28 @@
+[theme]
+base = "dark"
+
+primaryColor = "#A855F7"
+backgroundColor = "#060814"
+secondaryBackgroundColor = "#101426"
+textColor = "#F8FAFC"
+
+font = "sans-serif"
+headingFont = "sans-serif"
+
+baseRadius = "large"
+buttonRadius = "full"
+
+borderColor = "#28304A"
+dataframeBorderColor = "#303A59"
+dataframeHeaderBackgroundColor = "#171D32"
+
+showWidgetBorder = true
+
+chartCategoricalColors = [
+    "#22D3EE",
+    "#A855F7",
+    "#F97316",
+    "#4ADE80",
+    "#F43F5E",
+    "#FACC15"
+]
