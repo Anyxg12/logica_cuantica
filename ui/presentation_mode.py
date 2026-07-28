@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from logic.irreversible import (
     detectar_colisiones,
@@ -364,10 +365,12 @@ def render_agujero_negro() -> None:
         entropia=entropia,
         pureza=pureza,
         fidelidad=resultado.fidelidad,
+        theta=resultado.theta_grados,
+        phi=resultado.phi_grados,
         estado_sistema=estado_sistema,
     )
 
-    st.html(html)
+    components.html(html, height=740)
 
     st.info(mensaje)
 
