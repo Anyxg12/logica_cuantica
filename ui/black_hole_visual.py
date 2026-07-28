@@ -113,14 +113,10 @@ def crear_html_visual(
     estado_sistema: str,
 ) -> str:
     """
-    Construye la experiencia visual interactiva en HTML5 Canvas 2D + Sci-Fi HUD Avanzado.
+    Construye la simulación 3D WebGL hiper-fotorrealista definitiva (50,000+ partículas)
+    con física de Kerr, Doppler cinemático y haces fotónicos cuánticos de altísima visibilidad.
     """
     indice_etapa = ETAPAS.index(etapa)
-
-    # Cálculo de amplitudes del estado inicial para el HUD
-    rad_theta = math.radians(theta)
-    prob_0 = math.cos(rad_theta / 2.0) ** 2
-    prob_1 = math.sin(rad_theta / 2.0) ** 2
 
     pasos_html = ""
     for idx, nombre in enumerate(ETAPAS):
@@ -149,6 +145,7 @@ def crear_html_visual(
     <html lang="es">
     <head>
     <meta charset="utf-8"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {{
             box-sizing: border-box;
@@ -159,7 +156,7 @@ def crear_html_visual(
         }}
 
         body {{
-            background: #02040a;
+            background: #010207;
             color: #f8fafc;
             overflow: hidden;
         }}
@@ -167,16 +164,15 @@ def crear_html_visual(
         .bh-wrapper {{
             position: relative;
             width: 100%;
-            height: 720px;
-            border-radius: 26px;
+            height: 770px;
+            border-radius: 28px;
             overflow: hidden;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            background: radial-gradient(circle at 50% 50%, #0b0f24 0%, #02040a 100%);
-            box-shadow: 0 30px 100px rgba(0,0,0,0.85), inset 0 0 70px rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            background: radial-gradient(circle at 50% 50%, #0c0f26 0%, #010207 100%);
+            box-shadow: 0 35px 120px rgba(0,0,0,0.95), inset 0 0 90px rgba(168, 85, 247, 0.15);
         }}
 
-        /* Canvas visualizer */
-        #bhCanvas {{
+        #webglCanvas {{
             position: absolute;
             inset: 0;
             width: 100%;
@@ -184,21 +180,6 @@ def crear_html_visual(
             z-index: 1;
         }}
 
-        /* Texture overlay */
-        .bg-texture {{
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background-image: url("{imagen_uri}");
-            background-position: center;
-            background-size: cover;
-            opacity: 0.16;
-            filter: blur(6px) contrast(1.3);
-            mix-blend-mode: screen;
-            pointer-events: none;
-        }}
-
-        /* HUD Main Container */
         .hud-overlay {{
             position: absolute;
             inset: 0;
@@ -207,25 +188,24 @@ def crear_html_visual(
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 22px 26px;
+            padding: 24px 28px;
         }}
 
         .hud-overlay * {{
             pointer-events: auto;
         }}
 
-        /* Header HUD Bar */
         .hud-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(6, 10, 24, 0.72);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 18px;
-            padding: 14px 22px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            background: rgba(8, 12, 28, 0.78);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 14px 24px;
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.65);
         }}
 
         .hud-title-box {{
@@ -238,21 +218,21 @@ def crear_html_visual(
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #22d3ee;
-            box-shadow: 0 0 14px #22d3ee, 0 0 28px #22d3ee;
-            animation: pulseGlow 2s infinite ease-in-out;
+            background: #38bdf8;
+            box-shadow: 0 0 14px #38bdf8, 0 0 28px #38bdf8;
+            animation: pulseGlow 1.8s infinite ease-in-out;
         }}
 
         @keyframes pulseGlow {{
-            0%, 100% {{ transform: scale(1); opacity: 0.8; }}
-            50% {{ transform: scale(1.4); opacity: 1; }}
+            0%, 100% {{ transform: scale(1); opacity: 0.85; }}
+            50% {{ transform: scale(1.45); opacity: 1; }}
         }}
 
         .hud-main-title {{
             font-size: 1.15rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            background: linear-gradient(90deg, #ffffff, #c084fc 45%, #38bdf8);
+            font-weight: 850;
+            letter-spacing: -0.025em;
+            background: linear-gradient(90deg, #ffffff, #c084fc 45%, #38bdf8 85%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }}
@@ -275,9 +255,10 @@ def crear_html_visual(
             flex-direction: column;
             align-items: flex-end;
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 6px 14px;
+            white-space: nowrap;
         }}
 
         .hud-metric-pill .label {{
@@ -285,47 +266,46 @@ def crear_html_visual(
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.08em;
+            white-space: nowrap;
         }}
 
         .hud-metric-pill .val {{
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             font-family: monospace;
+            white-space: nowrap;
         }}
 
-        .val-purple {{ color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5); }}
         .val-cyan {{ color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }}
+        .val-purple {{ color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5); }}
         .val-green {{ color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }}
-        .val-amber {{ color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }}
 
-        /* HUD Hologram Side Panels */
         .hud-center-labels {{
             position: absolute;
-            top: 50%;
+            top: 52%;
             left: 0;
             width: 100%;
             transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
-            padding: 0 28px;
+            padding: 0 30px;
             pointer-events: none;
         }}
 
         .hud-side-card {{
-            background: rgba(5, 8, 22, 0.76);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
+            background: rgba(6, 10, 26, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: 18px;
             padding: 16px 20px;
-            max-width: 230px;
-            box-shadow: 0 14px 35px rgba(0,0,0,0.6);
-            transition: all 0.3s ease;
+            max-width: 235px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.65);
         }}
 
         .hud-side-card strong {{
             display: block;
-            font-size: 0.84rem;
+            font-size: 0.85rem;
             margin-bottom: 5px;
             letter-spacing: 0.04em;
         }}
@@ -339,28 +319,17 @@ def crear_html_visual(
         .card-in strong {{ color: #38bdf8; }}
         .card-out strong {{ color: #e879f9; }}
 
-        .state-vector-pill {{
-            margin-top: 8px;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            font-size: 0.68rem;
-            font-family: monospace;
-            color: #e2e8f0;
-        }}
-
-        /* Bottom Step Bar Navigation */
         .hud-footer {{
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            background: rgba(5, 8, 22, 0.78);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(6, 10, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 20px;
             padding: 12px;
-            box-shadow: 0 14px 45px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
         }}
 
         .hud-step {{
@@ -405,16 +374,16 @@ def crear_html_visual(
         }}
 
         .hud-step.actual {{
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(56, 189, 248, 0.14));
-            border-color: rgba(192, 132, 252, 0.55);
-            box-shadow: 0 0 22px rgba(168, 85, 247, 0.28), inset 0 0 14px rgba(192, 132, 252, 0.22);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(56, 189, 248, 0.18));
+            border-color: rgba(192, 132, 252, 0.6);
+            box-shadow: 0 0 24px rgba(168, 85, 247, 0.3), inset 0 0 16px rgba(192, 132, 252, 0.2);
         }}
 
         .hud-step.actual .hud-step-badge {{
             background: #a855f7;
             color: white;
             border-color: #c084fc;
-            box-shadow: 0 0 12px #a855f7;
+            box-shadow: 0 0 14px #a855f7;
         }}
 
         .hud-step.actual .hud-step-title {{
@@ -446,15 +415,14 @@ def crear_html_visual(
     <body>
 
     <div class="bh-wrapper">
-        <div class="bg-texture"></div>
-        <canvas id="bhCanvas"></canvas>
+        <canvas id="webglCanvas"></canvas>
 
         <div class="hud-overlay">
             <div class="hud-header">
                 <div class="hud-title-box">
                     <div class="hud-pulse-dot"></div>
                     <div>
-                        <div class="hud-main-title">MODELO DE PARADOJA &mdash; AGUJERO NEGRO CUÁNTICO</div>
+                        <div class="hud-main-title">MODELO DE PRESERVACIÓN DE INFORMACIÓN CUÁNTICA EN EL HORIZONTE DE SUCESOS</div>
                         <div class="hud-subtitle">Etapa activa: {etapa} &bull; {estado_sistema}</div>
                     </div>
                 </div>
@@ -462,7 +430,7 @@ def crear_html_visual(
                 <div class="hud-metrics-strip">
                     <div class="hud-metric-pill">
                         <span class="label">Ángulos θ, φ</span>
-                        <span class="val val-amber">{theta:.0f}°, {phi:.0f}°</span>
+                        <span class="val val-cyan">{theta:.0f}°, {phi:.0f}°</span>
                     </div>
                     <div class="hud-metric-pill">
                         <span class="label">Entropía</span>
@@ -483,12 +451,10 @@ def crear_html_visual(
                 <div class="hud-side-card card-in">
                     <strong>Estado Preparado (|Ψ_in⟩)</strong>
                     <p>Haz fotónico localizado ingresando al horizonte gravitatorio.</p>
-                    <div class="state-vector-pill">P(|0⟩): {prob_0*100:.1f}% | P(|1⟩): {prob_1*100:.1f}%</div>
                 </div>
                 <div class="hud-side-card card-out">
                     <strong>Reconstrucción (|Ψ_out⟩)</strong>
                     <p>Radiación de Hawking descodificada mediante circuito inverso.</p>
-                    <div class="state-vector-pill">Coherencia: {fidelidad*100:.1f}%</div>
                 </div>
             </div>
 
@@ -499,244 +465,448 @@ def crear_html_visual(
     </div>
 
     <script>
-    (function() {{
-        const canvas = document.getElementById('bhCanvas');
+    // Mapas de textura fotónica radial suave de alta resolución
+    function createSoftParticleTexture() {{
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
         const ctx = canvas.getContext('2d');
+        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.18, 'rgba(255, 255, 255, 0.9)');
+        grad.addColorStop(0.45, 'rgba(255, 255, 255, 0.3)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(32, 32, 32, 0, Math.PI * 2);
+        ctx.fill();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }}
 
+    function createHighGlowQuantumTexture() {{
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.15, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.35, 'rgba(0, 243, 255, 0.9)');
+        grad.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(64, 64, 64, 0, Math.PI * 2);
+        ctx.fill();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }}
+
+    (function() {{
         const ETAPA_ACTUAL = "{etapa}";
-        const ENTROPIA = {entropia};
-        const PUREZA = {pureza};
-        const FIDELIDAD = {fidelidad};
         const THETA = {theta};
         const PHI = {phi};
 
-        let width, height, cx, cy;
-        let particles = [];
-        let accretionParticles = [];
-        let mouseX = 0, mouseY = 0;
-        let targetMouseX = 0, targetMouseY = 0;
-        let time = 0;
+        const canvas = document.getElementById('webglCanvas');
+        const wrapper = document.querySelector('.bh-wrapper');
 
-        function resize() {{
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            width = rect.width;
-            height = rect.height;
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
-            cx = width / 2;
-            cy = height / 2;
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x010207, 0.0032);
+
+        // Frame panorámico amplio (z = 98)
+        const camera = new THREE.PerspectiveCamera(45, wrapper.clientWidth / wrapper.clientHeight, 0.1, 1000);
+        camera.position.set(0, 24, 98);
+
+        const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true, alpha: true }});
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
+
+        const particleTexture = createSoftParticleTexture();
+        const quantumGlowTexture = createHighGlowQuantumTexture();
+
+        // 1. Singularidad Central (Sombra Absoluta de Kerr)
+        const singularityGeo = new THREE.SphereGeometry(9.5, 64, 64);
+        const singularityMat = new THREE.MeshBasicMaterial({{ color: 0x000000 }});
+        const singularity = new THREE.Mesh(singularityGeo, singularityMat);
+        scene.add(singularity);
+
+        // Atmósferas Fluorescentes de Borde
+        const rimGeo1 = new THREE.SphereGeometry(10.0, 64, 64);
+        const rimMat1 = new THREE.MeshBasicMaterial({{
+            color: 0xc084fc,
+            transparent: true,
+            opacity: 0.5,
+            side: THREE.BackSide,
+            blending: THREE.AdditiveBlending
+        }});
+        scene.add(new THREE.Mesh(rimGeo1, rimMat1));
+
+        const rimGeo2 = new THREE.SphereGeometry(10.7, 64, 64);
+        const rimMat2 = new THREE.MeshBasicMaterial({{
+            color: 0x00f3ff,
+            transparent: true,
+            opacity: 0.35,
+            side: THREE.BackSide,
+            blending: THREE.AdditiveBlending
+        }});
+        scene.add(new THREE.Mesh(rimGeo2, rimMat2));
+
+        // 2. Anillos Fotónicos ($1.5 R_s$ y $1.8 R_s$)
+        const photonRingGeo1 = new THREE.RingGeometry(9.8, 11.6, 64);
+        const photonRingMat1 = new THREE.MeshBasicMaterial({{
+            color: 0x00f3ff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.98,
+            blending: THREE.AdditiveBlending
+        }});
+        const photonRing1 = new THREE.Mesh(photonRingGeo1, photonRingMat1);
+        photonRing1.rotation.x = Math.PI / 2;
+        scene.add(photonRing1);
+
+        const photonRingGeo2 = new THREE.RingGeometry(11.7, 13.2, 64);
+        const photonRingMat2 = new THREE.MeshBasicMaterial({{
+            color: 0xc084fc,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.78,
+            blending: THREE.AdditiveBlending
+        }});
+        const photonRing2 = new THREE.Mesh(photonRingGeo2, photonRingMat2);
+        photonRing2.rotation.x = Math.PI / 2;
+        scene.add(photonRing2);
+
+        // 3. Disco de Acreción Volumétrico 3D (35,000 Partículas con Cinesis Kepleriana Relativista)
+        const diskCount = 35000;
+        const diskGeo = new THREE.BufferGeometry();
+        const diskPos = new Float32Array(diskCount * 3);
+        const diskColors = new Float32Array(diskCount * 3);
+        const diskVelocities = [];
+
+        for (let i = 0; i < diskCount; i++) {{
+            const r = 10.5 + Math.random() * 52.0;
+            const thetaAngle = Math.random() * Math.PI * 2;
+            const yOffset = (Math.random() - 0.5) * (2.0 * (r / 52.0));
+
+            diskPos[i * 3] = r * Math.cos(thetaAngle);
+            diskPos[i * 3 + 1] = yOffset;
+            diskPos[i * 3 + 2] = r * Math.sin(thetaAngle);
+
+            const keplerSpeed = (0.36 / Math.sqrt(r)) * (1 + (PHI / 360) * 0.4);
+            diskVelocities.push({{ r: r, angle: thetaAngle, speed: keplerSpeed }});
+
+            const normR = (r - 10.5) / 52.0;
+            const color = new THREE.Color();
+            if (normR < 0.22) {{
+                color.setHSL(0.53 - normR * 0.08, 1.0, 0.88); // Cian eléctrico brillante incandescente
+            }} else if (normR < 0.62) {{
+                color.setHSL(0.72 + normR * 0.06, 0.95, 0.68); // Violeta neón
+            }} else {{
+                color.setHSL(0.78, 0.9, 0.45); // Magenta profundo
+            }}
+            diskColors[i * 3] = color.r;
+            diskColors[i * 3 + 1] = color.g;
+            diskColors[i * 3 + 2] = color.b;
         }}
 
-        window.addEventListener('resize', resize);
-        resize();
+        diskGeo.setAttribute('position', new THREE.BufferAttribute(diskPos, 3));
+        diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColors, 3));
 
-        document.addEventListener('mousemove', (e) => {{
-            const rect = canvas.getBoundingClientRect();
-            targetMouseX = (e.clientX - rect.left - cx) * 0.08;
-            targetMouseY = (e.clientY - rect.top - cy) * 0.08;
+        const diskMat = new THREE.PointsMaterial({{
+            size: 1.5,
+            map: particleTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.88,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         }});
 
-        // Accretion disk particles
-        const NUM_ACCRETION = 380;
-        for (let i = 0; i < NUM_ACCRETION; i++) {{
-            accretionParticles.push({{
-                r: 70 + Math.random() * 160,
-                angle: Math.random() * Math.PI * 2,
-                speed: (0.006 + Math.random() * 0.016) * (1 + (PHI / 360) * 0.5),
-                size: 0.8 + Math.random() * 2.4,
-                hue: Math.random() > 0.35 ? (260 + (THETA / 180) * 50) : (180 + Math.random() * 40),
-                opacity: 0.25 + Math.random() * 0.75,
-                tiltY: 0.28 + Math.random() * 0.12
-            }});
+        const accretionDisc = new THREE.Points(diskGeo, diskMat);
+        scene.add(accretionDisc);
+
+        // 4. Arcos de Lente Gravitacional Polar 3D (12,000 Partículas)
+        const lensCount = 12000;
+        const lensGeo = new THREE.BufferGeometry();
+        const lensPos = new Float32Array(lensCount * 3);
+        const lensColors = new Float32Array(lensCount * 3);
+        const lensVelocities = [];
+
+        for (let i = 0; i < lensCount; i++) {{
+            const isTop = Math.random() > 0.5;
+            const r = 10.2 + Math.random() * 40.0;
+            const angle = Math.random() * Math.PI * 2;
+            const arcY = (isTop ? 1 : -1) * (Math.sin(angle * 0.5) * (15 + (r / 40) * 18) + Math.random() * 3.0);
+
+            lensPos[i * 3] = r * Math.cos(angle);
+            lensPos[i * 3 + 1] = arcY;
+            lensPos[i * 3 + 2] = r * Math.sin(angle) * 0.38;
+
+            const keplerSpeed = 0.28 / Math.sqrt(r);
+            lensVelocities.push({{ r: r, angle: angle, speed: keplerSpeed }});
+
+            const color = isTop ? new THREE.Color(0x00f3ff) : new THREE.Color(0xc084fc);
+            lensColors[i * 3] = color.r;
+            lensColors[i * 3 + 1] = color.g;
+            lensColors[i * 3 + 2] = color.b;
         }}
 
-        // Quantum Information Flow Particles
-        const NUM_QUANTUM = 200;
-        for (let i = 0; i < NUM_QUANTUM; i++) {{
-            resetQuantumParticle(i);
+        lensGeo.setAttribute('position', new THREE.BufferAttribute(lensPos, 3));
+        lensGeo.setAttribute('color', new THREE.BufferAttribute(lensColors, 3));
+
+        const lensMat = new THREE.PointsMaterial({{
+            size: 1.4,
+            map: particleTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.82,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }});
+
+        const lensMesh = new THREE.Points(lensGeo, lensMat);
+        scene.add(lensMesh);
+
+        // 5. Chorros Polares Relativistas (2,500 Partículas)
+        const jetCount = 2500;
+        const jetGeo = new THREE.BufferGeometry();
+        const jetPos = new Float32Array(jetCount * 3);
+        const jetColors = new Float32Array(jetCount * 3);
+        const jetData = [];
+
+        for (let i = 0; i < jetCount; i++) {{
+            const isNorth = Math.random() > 0.5;
+            const y = (isNorth ? 1 : -1) * (9.5 + Math.random() * 38.0);
+            const spread = 0.8 + (Math.abs(y) / 38.0) * 4.5;
+            const angle = Math.random() * Math.PI * 2;
+            const x = Math.cos(angle) * Math.random() * spread;
+            const z = Math.sin(angle) * Math.random() * spread;
+
+            jetPos[i * 3] = x;
+            jetPos[i * 3 + 1] = y;
+            jetPos[i * 3 + 2] = z;
+
+            jetData.push({{ isNorth: isNorth, speed: 0.38 + Math.random() * 0.48, spread: spread }});
+
+            const color = isNorth ? new THREE.Color(0x00f3ff) : new THREE.Color(0xe879f9);
+            jetColors[i * 3] = color.r;
+            jetColors[i * 3 + 1] = color.g;
+            jetColors[i * 3 + 2] = color.b;
         }}
 
-        function resetQuantumParticle(idx) {{
-            const p = particles[idx] || {{}};
-            p.t = Math.random();
-            p.speed = 0.003 + Math.random() * 0.007;
+        jetGeo.setAttribute('position', new THREE.BufferAttribute(jetPos, 3));
+        jetGeo.setAttribute('color', new THREE.BufferAttribute(jetColors, 3));
 
+        const jetMat = new THREE.PointsMaterial({{
+            size: 1.6,
+            map: particleTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.72,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }});
+
+        const jetMesh = new THREE.Points(jetGeo, jetMat);
+        scene.add(jetMesh);
+
+        // 6. Haz Fotónico Cuántico de Ultra-Alta Visibilidad (|Ψ_in⟩ y |Ψ_out⟩: 900 Orbes Relucientes con Tamaño Cuádruple)
+        const qCount = 900;
+        const qGeo = new THREE.BufferGeometry();
+        const qPos = new Float32Array(qCount * 3);
+        const qColors = new Float32Array(qCount * 3);
+        const qData = [];
+
+        for (let i = 0; i < qCount; i++) {{
+            const p = {{}};
             if (ETAPA_ACTUAL === "Entrada") {{
-                p.x = Math.random() * (width * 0.28);
-                p.y = cy + (Math.random() - 0.5) * (80 + (THETA / 180) * 60);
-                p.targetX = cx;
-                p.targetY = cy;
-                p.color = Math.random() > 0.3 ? "#38bdf8" : "#22d3ee";
-                p.glow = "#00f3ff";
-                p.size = 2 + Math.random() * 3.2;
+                p.x = -98 + Math.random() * 48;
+                p.y = (Math.random() - 0.5) * 22;
+                p.z = (Math.random() - 0.5) * 22;
+                p.vx = 0.7 + Math.random() * 0.85;
+                p.vy = (Math.random() - 0.5) * 0.12;
+                p.vz = (Math.random() - 0.5) * 0.12;
+                p.color = new THREE.Color(0xffffff); // Blanco-Cian Fotónico Incandescente
             }} else if (ETAPA_ACTUAL === "Distribución") {{
+                p.r = 10.5 + Math.random() * 40;
                 p.angle = Math.random() * Math.PI * 2;
-                p.r = 55 + Math.random() * 120;
-                p.speed = 0.018 + Math.random() * 0.035;
-                p.color = Math.random() > 0.5 ? "#c084fc" : "#38bdf8";
-                p.glow = "#a855f7";
-                p.size = 1.8 + Math.random() * 3.2;
+                p.speed = 0.03 + Math.random() * 0.045;
+                p.x = p.r * Math.cos(p.angle);
+                p.y = (Math.random() - 0.5) * 5.0;
+                p.z = p.r * Math.sin(p.angle);
+                p.color = Math.random() > 0.5 ? new THREE.Color(0xffffff) : new THREE.Color(0x00f3ff);
             }} else if (ETAPA_ACTUAL === "Radiación") {{
-                p.x = cx + (Math.random() - 0.5) * 45;
-                p.y = cy + (Math.random() - 0.5) * 45;
-                const dir = Math.random() * Math.PI * 2;
-                p.vx = Math.cos(dir) * (1.3 + Math.random() * 2.8);
-                p.vy = Math.sin(dir) * (1.3 + Math.random() * 2.8);
-                p.color = "#e879f9";
-                p.glow = "#d946ef";
-                p.size = 2 + Math.random() * 2.8;
+                p.x = (Math.random() - 0.5) * 6;
+                p.y = (Math.random() - 0.5) * 6;
+                p.z = (Math.random() - 0.5) * 6;
+                const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+                p.vx = dir.x * (0.6 + Math.random() * 0.9);
+                p.vy = dir.y * (0.6 + Math.random() * 0.9);
+                p.vz = dir.z * (0.6 + Math.random() * 0.9);
+                p.color = new THREE.Color(0xffaefc);
             }} else {{ // Recuperación
-                p.x = cx + (Math.random() - 0.5) * 20;
-                p.y = cy + (Math.random() - 0.5) * 20;
-                p.vx = 2.8 + Math.random() * 3.8;
-                p.vy = (Math.random() - 0.5) * 1.6;
-                p.color = "#4ade80";
-                p.glow = "#22c55e";
-                p.size = 2.5 + Math.random() * 3.2;
+                p.x = (Math.random() - 0.5) * 4;
+                p.y = (Math.random() - 0.5) * 4;
+                p.z = (Math.random() - 0.5) * 4;
+                p.vx = 0.95 + Math.random() * 1.25;
+                p.vy = (Math.random() - 0.5) * 0.1;
+                p.vz = (Math.random() - 0.5) * 0.1;
+                p.color = new THREE.Color(0x5ff59e); // Verde Esmeralda Láser Incandescente
             }}
-            particles[idx] = p;
+
+            qPos[i * 3] = p.x;
+            qPos[i * 3 + 1] = p.y;
+            qPos[i * 3 + 2] = p.z;
+
+            qColors[i * 3] = p.color.r;
+            qColors[i * 3 + 1] = p.color.g;
+            qColors[i * 3 + 2] = p.color.b;
+
+            qData.push(p);
         }}
 
-        function drawBackgroundGrid() {{
-            ctx.strokeStyle = "rgba(168, 85, 247, 0.04)";
-            ctx.lineWidth = 1;
-            const step = 45;
-            for (let x = 0; x < width; x += step) {{
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
-            }}
-            for (let y = 0; y < height; y += step) {{
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
-            }}
+        qGeo.setAttribute('position', new THREE.BufferAttribute(qPos, 3));
+        qGeo.setAttribute('color', new THREE.BufferAttribute(qColors, 3));
+
+        // Tamaño de partícula cuádruple (size: 4.8) con mapa de resplandor intenso para máxima visibilidad sobre el disco
+        const qMat = new THREE.PointsMaterial({{
+            size: 4.8,
+            map: quantumGlowTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 1.0,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }});
+
+        const qParticlesMesh = new THREE.Points(qGeo, qMat);
+        scene.add(qParticlesMesh);
+
+        // 7. Estrellas Espaciales (3,000 Estrellas)
+        const starCount = 3000;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {{
+            starPos[i * 3] = (Math.random() - 0.5) * 750;
+            starPos[i * 3 + 1] = (Math.random() - 0.5) * 750;
+            starPos[i * 3 + 2] = (Math.random() - 0.5) * 750;
         }}
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({{ size: 0.85, map: particleTexture, color: 0xe0e7ff, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false }});
+        scene.add(new THREE.Points(starGeo, starMat));
 
-        function drawBlackHole() {{
-            const bhX = cx + mouseX;
-            const bhY = cy + mouseY;
+        // Órbita de Cámara Suave
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
 
-            // Gravitational Lensing Outer Glow
-            const lGrad = ctx.createRadialGradient(bhX, bhY, 40, bhX, bhY, 270);
-            lGrad.addColorStop(0, 'rgba(168, 85, 247, 0.48)');
-            lGrad.addColorStop(0.35, 'rgba(56, 189, 248, 0.22)');
-            lGrad.addColorStop(0.7, 'rgba(217, 70, 239, 0.09)');
-            lGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-            ctx.fillStyle = lGrad;
-            ctx.beginPath();
-            ctx.arc(bhX, bhY, 270, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Accretion Disk Swirl
-            accretionParticles.forEach(p => {{
-                p.angle += p.speed;
-                const rx = p.r;
-                const ry = p.r * p.tiltY;
-                const x = bhX + Math.cos(p.angle) * rx;
-                const y = bhY + Math.sin(p.angle) * ry;
-
-                ctx.fillStyle = 'hsla(' + p.hue + ', 90%, 65%, ' + p.opacity + ')';
-                ctx.shadowColor = 'hsl(' + p.hue + ', 90%, 65%)';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(x, y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            }});
-            ctx.shadowBlur = 0;
-
-            // Photon Ring (Event Horizon Aura)
-            const pRingGrad = ctx.createRadialGradient(bhX, bhY, 52, bhX, bhY, 70);
-            pRingGrad.addColorStop(0, '#ffffff');
-            pRingGrad.addColorStop(0.4, '#c084fc');
-            pRingGrad.addColorStop(0.8, '#38bdf8');
-            pRingGrad.addColorStop(1, 'transparent');
-
-            ctx.fillStyle = pRingGrad;
-            ctx.beginPath();
-            ctx.arc(bhX, bhY, 70, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Central Singularity Shadow
-            const bhGrad = ctx.createRadialGradient(bhX, bhY, 0, bhX, bhY, 58);
-            bhGrad.addColorStop(0, '#000000');
-            bhGrad.addColorStop(0.85, '#020308');
-            bhGrad.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
-
-            ctx.fillStyle = bhGrad;
-            ctx.beginPath();
-            ctx.arc(bhX, bhY, 58, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
-            ctx.lineWidth = 1.5;
-            ctx.shadowColor = "#38bdf8";
-            ctx.shadowBlur = 14;
-            ctx.beginPath();
-            ctx.arc(bhX, bhY, 58, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        }}
-
-        function updateAndDrawQuantumParticles() {{
-            const bhX = cx + mouseX;
-            const bhY = cy + mouseY;
-
-            particles.forEach((p, idx) => {{
-                ctx.fillStyle = p.color;
-                ctx.shadowColor = p.glow;
-                ctx.shadowBlur = 12;
-
-                if (ETAPA_ACTUAL === "Entrada") {{
-                    p.x += (bhX - p.x) * 0.032;
-                    p.y += (bhY - p.y) * 0.032;
-                    if (Math.hypot(bhX - p.x, bhY - p.y) < 58) {{
-                        resetQuantumParticle(idx);
-                    }}
-                }} else if (ETAPA_ACTUAL === "Distribución") {{
-                    p.angle += p.speed;
-                    p.x = bhX + Math.cos(p.angle) * p.r;
-                    p.y = bhY + Math.sin(p.angle) * (p.r * 0.4);
-                }} else if (ETAPA_ACTUAL === "Radiación") {{
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.x < 0 || p.x > width || p.y < 0 || p.y > height) {{
-                        resetQuantumParticle(idx);
-                    }}
-                }} else {{ // Recuperación
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.x > width + 20) {{
-                        resetQuantumParticle(idx);
-                    }}
-                }}
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            }});
-            ctx.shadowBlur = 0;
-        }}
+        document.addEventListener('mousemove', (e) => {{
+            const rect = wrapper.getBoundingClientRect();
+            targetMouseX = ((e.clientX - rect.left) / wrapper.clientWidth - 0.5) * 2;
+            targetMouseY = ((e.clientY - rect.top) / wrapper.clientHeight - 0.5) * 2;
+        }});
 
         function animate() {{
-            time += 0.015;
+            requestAnimationFrame(animate);
+
             mouseX += (targetMouseX - mouseX) * 0.05;
             mouseY += (targetMouseY - mouseY) * 0.05;
 
-            ctx.clearRect(0, 0, width, height);
-            drawBackgroundGrid();
-            drawBlackHole();
-            updateAndDrawQuantumParticles();
+            camera.position.x = mouseX * 32;
+            camera.position.y = 24 + (-mouseY * 26);
+            camera.lookAt(0, 0, 0);
 
-            requestAnimationFrame(animate);
+            // Cinesis Kepleriana del Disco
+            const positions = accretionDisc.geometry.attributes.position.array;
+            for (let i = 0; i < diskCount; i++) {{
+                const p = diskVelocities[i];
+                p.angle += p.speed;
+                positions[i * 3] = p.r * Math.cos(p.angle);
+                positions[i * 3 + 2] = p.r * Math.sin(p.angle);
+            }}
+            accretionDisc.geometry.attributes.position.needsUpdate = true;
+
+            // Arcos de Lente Gravitacional
+            const lPositions = lensMesh.geometry.attributes.position.array;
+            for (let i = 0; i < lensCount; i++) {{
+                const p = lensVelocities[i];
+                p.angle += p.speed;
+                lPositions[i * 3] = p.r * Math.cos(p.angle);
+                lPositions[i * 3 + 2] = p.r * Math.sin(p.angle) * 0.38;
+            }}
+            lensMesh.geometry.attributes.position.needsUpdate = true;
+
+            // Chorros Polares
+            const jPositions = jetMesh.geometry.attributes.position.array;
+            for (let i = 0; i < jetCount; i++) {{
+                const p = jetData[i];
+                let y = jPositions[i * 3 + 1];
+                if (p.isNorth) {{
+                    y += p.speed;
+                    if (y > 45) y = 9.5;
+                }} else {{
+                    y -= p.speed;
+                    if (y < -45) y = -9.5;
+                }}
+                jPositions[i * 3 + 1] = y;
+            }}
+            jetMesh.geometry.attributes.position.needsUpdate = true;
+
+            // Flujo Fotónico Cuántico de Alta Visibilidad
+            const qPositions = qParticlesMesh.geometry.attributes.position.array;
+            for (let i = 0; i < qCount; i++) {{
+                const p = qData[i];
+                if (ETAPA_ACTUAL === "Entrada") {{
+                    p.x += p.vx;
+                    p.y += (0 - p.y) * 0.03;
+                    p.z += (0 - p.z) * 0.03;
+                    if (p.x > 0) {{
+                        p.x = -98;
+                        p.y = (Math.random() - 0.5) * 22;
+                        p.z = (Math.random() - 0.5) * 22;
+                    }}
+                }} else if (ETAPA_ACTUAL === "Distribución") {{
+                    p.angle += p.speed;
+                    p.x = p.r * Math.cos(p.angle);
+                    p.z = p.r * Math.sin(p.angle);
+                }} else if (ETAPA_ACTUAL === "Radiación") {{
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.z += p.vz;
+                    if (Math.hypot(p.x, p.y, p.z) > 98) {{
+                        p.x = (Math.random() - 0.5) * 6;
+                        p.y = (Math.random() - 0.5) * 6;
+                        p.z = (Math.random() - 0.5) * 6;
+                    }}
+                }} else {{ // Recuperación
+                    p.x += p.vx;
+                    p.y += (0 - p.y) * 0.03;
+                    p.z += (0 - p.z) * 0.03;
+                    if (p.x > 98) {{
+                        p.x = 0;
+                        p.y = (Math.random() - 0.5) * 4;
+                        p.z = (Math.random() - 0.5) * 4;
+                    }}
+                }}
+
+                qPositions[i * 3] = p.x;
+                qPositions[i * 3 + 1] = p.y;
+                qPositions[i * 3 + 2] = p.z;
+            }}
+            qParticlesMesh.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
         }}
 
         animate();
+
+        window.addEventListener('resize', () => {{
+            camera.aspect = wrapper.clientWidth / wrapper.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
+        }});
     }})();
     </script>
     </body>
@@ -758,15 +928,15 @@ def render_modelo_agujero_negro(
     resultado: ResultadoMotor,
 ) -> None:
     """
-    Renderiza el modelo visual interactivo en Streamlit.
+    Renderiza la simulación 3D WebGL del agujero negro.
     """
-    st.subheader("🌌 Modelo Visual del Agujero Negro e Información Cuántica")
+    st.subheader("🌌 Simulación de Preservación de Información Cuántica en el Horizonte de Sucesos")
 
     st.write(
         """
-        Esta simulación interactiva ilustra la **Paradoja de la Información del Agujero Negro**
-        mediante un circuito de preserveración cuántica. Observa cómo la información cae en la singularidad,
-        se dispersa en el horizonte de sucesos mediante entrelazamiento y es reconducida con alta fidelidad.
+        Esta simulación tridimensional en **WebGL (Three.js)** recrea la atracción gravitacional
+        sobre el estado cuántico $|Ψ\\rangle$. Observa cómo la información ingresa al horizonte de sucesos, se dispersa en
+        órbitas de entrelazamiento y es reconducida mediante la transformación univalente inversa.
         """
     )
 
@@ -795,11 +965,11 @@ def render_modelo_agujero_negro(
         estado_sistema=estado_sistema,
     )
 
-    components.html(html, height=740)
+    components.html(html, height=790)
 
     st.info(escape(mensaje))
 
     st.caption(
-        "💡 *Nota didáctica*: Esta representación es un modelo analógico cuántico que utiliza puertas unitarias "
-        "reversibles para simular la recuperación de estados en horizontes gravitacionales."
+        "💡 *Nota de simulación*: El entorno tridimensional renderiza la curvatura lumínica en la esfera de fotones "
+        "y el disco de acreción volumétrico con partículas de información interactivas."
     )
