@@ -113,8 +113,8 @@ def crear_html_visual(
     estado_sistema: str,
 ) -> str:
     """
-    Construye la simulación 3D WebGL hiper-fotorrealista definitiva (50,000+ partículas)
-    con física de Kerr, Doppler cinemático y haces fotónicos cuánticos de altísima visibilidad.
+    Construye la simulación 3D WebGL hiper-fotorrealista definitiva con Three.js
+    optimizada con retardo seguro CDN para compatibilidad 100% con Streamlit Cloud.
     """
     indice_etapa = ETAPAS.index(etapa)
 
@@ -465,7 +465,6 @@ def crear_html_visual(
     </div>
 
     <script>
-    // Mapas de textura fotónica radial suave de alta resolución
     function createSoftParticleTexture() {{
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -493,8 +492,8 @@ def crear_html_visual(
         const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
         grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
         grad.addColorStop(0.15, 'rgba(255, 255, 255, 1)');
-        grad.addColorStop(0.35, 'rgba(0, 243, 255, 0.9)');
-        grad.addColorStop(0.7, 'rgba(168, 85, 247, 0.4)');
+        grad.addColorStop(0.35, 'rgba(0, 243, 255, 0.95)');
+        grad.addColorStop(0.7, 'rgba(168, 85, 247, 0.45)');
         grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -505,7 +504,12 @@ def crear_html_visual(
         return texture;
     }}
 
-    (function() {{
+    function initSim() {{
+        if (typeof THREE === 'undefined') {{
+            setTimeout(initSim, 50);
+            return;
+        }}
+
         const ETAPA_ACTUAL = "{etapa}";
         const THETA = {theta};
         const PHI = {phi};
@@ -513,10 +517,11 @@ def crear_html_visual(
         const canvas = document.getElementById('webglCanvas');
         const wrapper = document.querySelector('.bh-wrapper');
 
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x010207, 0.0032);
+        if (!canvas || !wrapper) return;
 
-        // Frame panorámico amplio (z = 98)
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x010207, 0.0035);
+
         const camera = new THREE.PerspectiveCamera(45, wrapper.clientWidth / wrapper.clientHeight, 0.1, 1000);
         camera.position.set(0, 24, 98);
 
@@ -527,7 +532,7 @@ def crear_html_visual(
         const particleTexture = createSoftParticleTexture();
         const quantumGlowTexture = createHighGlowQuantumTexture();
 
-        // 1. Singularidad Central (Sombra Absoluta de Kerr)
+        // 1. Singularidad Central
         const singularityGeo = new THREE.SphereGeometry(9.5, 64, 64);
         const singularityMat = new THREE.MeshBasicMaterial({{ color: 0x000000 }});
         const singularity = new THREE.Mesh(singularityGeo, singularityMat);
@@ -579,8 +584,8 @@ def crear_html_visual(
         photonRing2.rotation.x = Math.PI / 2;
         scene.add(photonRing2);
 
-        // 3. Disco de Acreción Volumétrico 3D (35,000 Partículas con Cinesis Kepleriana Relativista)
-        const diskCount = 35000;
+        // 3. Disco de Acreción Volumétrico (20,000 Partículas con Cinesis Kepleriana)
+        const diskCount = 20000;
         const diskGeo = new THREE.BufferGeometry();
         const diskPos = new Float32Array(diskCount * 3);
         const diskColors = new Float32Array(diskCount * 3);
@@ -601,11 +606,11 @@ def crear_html_visual(
             const normR = (r - 10.5) / 52.0;
             const color = new THREE.Color();
             if (normR < 0.22) {{
-                color.setHSL(0.53 - normR * 0.08, 1.0, 0.88); // Cian eléctrico brillante incandescente
+                color.setHSL(0.53 - normR * 0.08, 1.0, 0.88);
             }} else if (normR < 0.62) {{
-                color.setHSL(0.72 + normR * 0.06, 0.95, 0.68); // Violeta neón
+                color.setHSL(0.72 + normR * 0.06, 0.95, 0.68);
             }} else {{
-                color.setHSL(0.78, 0.9, 0.45); // Magenta profundo
+                color.setHSL(0.78, 0.9, 0.45);
             }}
             diskColors[i * 3] = color.r;
             diskColors[i * 3 + 1] = color.g;
@@ -616,7 +621,7 @@ def crear_html_visual(
         diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColors, 3));
 
         const diskMat = new THREE.PointsMaterial({{
-            size: 1.5,
+            size: 1.6,
             map: particleTexture,
             vertexColors: true,
             transparent: true,
@@ -628,8 +633,8 @@ def crear_html_visual(
         const accretionDisc = new THREE.Points(diskGeo, diskMat);
         scene.add(accretionDisc);
 
-        // 4. Arcos de Lente Gravitacional Polar 3D (12,000 Partículas)
-        const lensCount = 12000;
+        // 4. Arcos de Lente Gravitacional Polar (6,000 Partículas)
+        const lensCount = 6000;
         const lensGeo = new THREE.BufferGeometry();
         const lensPos = new Float32Array(lensCount * 3);
         const lensColors = new Float32Array(lensCount * 3);
@@ -658,7 +663,7 @@ def crear_html_visual(
         lensGeo.setAttribute('color', new THREE.BufferAttribute(lensColors, 3));
 
         const lensMat = new THREE.PointsMaterial({{
-            size: 1.4,
+            size: 1.5,
             map: particleTexture,
             vertexColors: true,
             transparent: true,
@@ -670,8 +675,8 @@ def crear_html_visual(
         const lensMesh = new THREE.Points(lensGeo, lensMat);
         scene.add(lensMesh);
 
-        // 5. Chorros Polares Relativistas (2,500 Partículas)
-        const jetCount = 2500;
+        // 5. Chorros Polares Relativistas (1,500 Partículas)
+        const jetCount = 1500;
         const jetGeo = new THREE.BufferGeometry();
         const jetPos = new Float32Array(jetCount * 3);
         const jetColors = new Float32Array(jetCount * 3);
@@ -701,11 +706,11 @@ def crear_html_visual(
         jetGeo.setAttribute('color', new THREE.BufferAttribute(jetColors, 3));
 
         const jetMat = new THREE.PointsMaterial({{
-            size: 1.6,
+            size: 1.8,
             map: particleTexture,
             vertexColors: true,
             transparent: true,
-            opacity: 0.72,
+            opacity: 0.75,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         }});
@@ -713,8 +718,8 @@ def crear_html_visual(
         const jetMesh = new THREE.Points(jetGeo, jetMat);
         scene.add(jetMesh);
 
-        // 6. Haz Fotónico Cuántico de Ultra-Alta Visibilidad (|Ψ_in⟩ y |Ψ_out⟩: 900 Orbes Relucientes con Tamaño Cuádruple)
-        const qCount = 900;
+        // 6. Haz Fotónico Cuántico de Alta Visibilidad (800 Orbes de Gran Tamaño)
+        const qCount = 800;
         const qGeo = new THREE.BufferGeometry();
         const qPos = new Float32Array(qCount * 3);
         const qColors = new Float32Array(qCount * 3);
@@ -729,7 +734,7 @@ def crear_html_visual(
                 p.vx = 0.7 + Math.random() * 0.85;
                 p.vy = (Math.random() - 0.5) * 0.12;
                 p.vz = (Math.random() - 0.5) * 0.12;
-                p.color = new THREE.Color(0xffffff); // Blanco-Cian Fotónico Incandescente
+                p.color = new THREE.Color(0xffffff);
             }} else if (ETAPA_ACTUAL === "Distribución") {{
                 p.r = 10.5 + Math.random() * 40;
                 p.angle = Math.random() * Math.PI * 2;
@@ -747,14 +752,14 @@ def crear_html_visual(
                 p.vy = dir.y * (0.6 + Math.random() * 0.9);
                 p.vz = dir.z * (0.6 + Math.random() * 0.9);
                 p.color = new THREE.Color(0xffaefc);
-            }} else {{ // Recuperación
+            }} else {{
                 p.x = (Math.random() - 0.5) * 4;
                 p.y = (Math.random() - 0.5) * 4;
                 p.z = (Math.random() - 0.5) * 4;
                 p.vx = 0.95 + Math.random() * 1.25;
                 p.vy = (Math.random() - 0.5) * 0.1;
                 p.vz = (Math.random() - 0.5) * 0.1;
-                p.color = new THREE.Color(0x5ff59e); // Verde Esmeralda Láser Incandescente
+                p.color = new THREE.Color(0x5ff59e);
             }}
 
             qPos[i * 3] = p.x;
@@ -771,7 +776,6 @@ def crear_html_visual(
         qGeo.setAttribute('position', new THREE.BufferAttribute(qPos, 3));
         qGeo.setAttribute('color', new THREE.BufferAttribute(qColors, 3));
 
-        // Tamaño de partícula cuádruple (size: 4.8) con mapa de resplandor intenso para máxima visibilidad sobre el disco
         const qMat = new THREE.PointsMaterial({{
             size: 4.8,
             map: quantumGlowTexture,
@@ -785,8 +789,8 @@ def crear_html_visual(
         const qParticlesMesh = new THREE.Points(qGeo, qMat);
         scene.add(qParticlesMesh);
 
-        // 7. Estrellas Espaciales (3,000 Estrellas)
-        const starCount = 3000;
+        // 7. Estrellas Espaciales (2,000 Estrellas)
+        const starCount = 2000;
         const starGeo = new THREE.BufferGeometry();
         const starPos = new Float32Array(starCount * 3);
         for (let i = 0; i < starCount; i++) {{
@@ -880,7 +884,7 @@ def crear_html_visual(
                         p.y = (Math.random() - 0.5) * 6;
                         p.z = (Math.random() - 0.5) * 6;
                     }}
-                }} else {{ // Recuperación
+                }} else {{
                     p.x += p.vx;
                     p.y += (0 - p.y) * 0.03;
                     p.z += (0 - p.z) * 0.03;
@@ -907,7 +911,13 @@ def crear_html_visual(
             camera.updateProjectionMatrix();
             renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         }});
-    }})();
+    }}
+
+    if (document.readyState === 'complete') {{
+        initSim();
+    }} else {{
+        window.addEventListener('load', initSim);
+    }}
     </script>
     </body>
     </html>
